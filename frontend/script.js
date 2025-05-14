@@ -71,7 +71,7 @@ fileInput.addEventListener('change', async (e) => {
     formData.append('file', file);
 
     try {
-        const res = await fetch('http://localhost:8000/upload/', {
+        const res = await fetch('https://drinks-nutrition-app.onrender.com/upload/', {
             method: 'POST',
             body: formData
         });
