@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+STANDARD_NO_DRINKS_MSG = "No drinks were found in your request to analyze the picture for menu information. Please provide a menu image."
+
 app = FastAPI()
 
 # Allow frontend to access backend
@@ -87,40 +89,40 @@ async def upload_menu(file: UploadFile = File(...)):
         base64_image = encode_image_to_base64(image)
 
         # Prepare the prompt for OpenAI
-        prompt = """Analyze this menu image and extract drink information. First, list all drink names you see. Then, for each, provide the details in the JSON format. For each drink, provide:
-        - name
-        - price
-        - alcoholic ingredients (comma-separated list)
-        - non-alcoholic ingredients (comma-separated list)
-        - estimated pure alcohol content in oz
-        - estimated calories
-
-        Return the data in this exact JSON format:
+        prompt = """Extract drink data from this menu image. Output JSON:
         {
+            "count": int,
             "drinks": [
                 {
-                    "name": "string",
-                    "price": "string",
-                    "alcoholic_ingredients": "string",
-                    "non_alcoholic_ingredients": "string",
-                    "alcohol_oz": float,
-                    "calories": integer
+                "name": "string",
+                "price": "string (no $)",
+                "alcoholic_ingredients": "comma-separated string",
+                "non_alcoholic_ingredients": "comma-separated string",
+                "alcohol_oz": float (estimated pure alcohol content),
+                "calories": int (estimated)
                 }
             ]
         }
 
-        Be sure to include all beers, wines, and spirits. 
-        If you don't know the ingredients, use the name and search the internet for the ingredients.
-        For alcohol content of beers/wines/spirits, use the name and search the internet for the alcohol percentage and calculate thecontent in oz. 
-        For calories, provide your best estimate based on ingredients, estimated amounts,and whether it's likely to be a syrup.
-        If you're unsure about any value, use null. 
-        Drop the currency symbol for prices.
+        Instructions:
+        - Include all drinks: cocktails, beers, wines, spirits
+        - Estimate `alcohol_oz` from ABV * volume (lookup if needed)
+        - Estimate `calories` from ingredients and likely amounts (lookup if needed)
+        - Use `null` if uncertain. Return only JSON
+
+        Search the internet for nutrition facts of ingredients you don't know.
+        Use the name of beers/wines/spirits to search the internet and use alcohol percentage to calculate the alcohol content in oz. 
         """
 
         # Call OpenAI API with GPT-4 Vision
         response = client.chat.completions.create(
             model="gpt-4.1-mini",  # Updated to current model name
             messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert nutritionist and research nutrition facts carefully before providing a response.
+                    If no drinks are found, reply with: 'No drinks found. Please provide a menu image.'"""
+                },
                 {
                     "role": "user",
                     "content": [
@@ -171,13 +173,13 @@ async def upload_menu(file: UploadFile = File(...)):
                             data = json.loads(truncated_json)
                         except json.JSONDecodeError as final_err:
                             # If all parsing fails, return the raw message as an error
-                            return JSONResponse(content={"error": content})
+                            return JSONResponse(content={"error": STANDARD_NO_DRINKS_MSG})
                     else:
                         # If all parsing fails, return the raw message as an error
-                        return JSONResponse(content={"error": content})
+                        return JSONResponse(content={"error": STANDARD_NO_DRINKS_MSG})
             else:
                 # If all parsing fails, return the raw message as an error
-                return JSONResponse(content={"error": content})
+                return JSONResponse(content={"error": STANDARD_NO_DRINKS_MSG})
         
         return JSONResponse(content=data)
 
