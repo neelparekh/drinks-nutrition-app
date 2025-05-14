@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Extractor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f5f5f5 100%);
+        }
+        .center-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(60, 60, 120, 0.12);
+            padding: 40px 32px 32px 32px;
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+            margin: 48px auto 48px auto;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #2d3a5a;
+            margin-bottom: 0.2em;
+            letter-spacing: -1px;
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+        }
+        .subtitle {
+            color: #5c6b8a;
+            font-size: 1.1rem;
+            margin-bottom: 1.2em;
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+        }
+        .upload-area {
+            border: 2.5px dashed #4f8cff;
+            border-radius: 12px;
+            background: #f4f8ff;
+            padding: 36px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 0.5em;
+            position: relative;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            background: #e6f0ff;
+            border-color: #2563eb;
+        }
+        .upload-icon {
+            font-size: 3.2rem;
+            color: #4f8cff;
+            margin-bottom: 0.5em;
+            display: block;
+        }
+        #file-input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0; top: 0;
+            cursor: pointer;
+        }
+        #menu-img {
+            max-width: 320px;
+            max-height: 220px;
+            border-radius: 8px;
+            margin: 1em 0 0.5em 0;
+            box-shadow: 0 2px 8px rgba(60, 60, 120, 0.10);
+            display: none;
+        }
+        .file-info {
+            color: #6b7280;
+            font-size: 0.98rem;
+            margin-bottom: 0.5em;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1.2em;
+            background: #f9fafb;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(60, 60, 120, 0.08);
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+        }
+        th {
+            background: #4f8cff;
+            color: #fff;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e7ff;
+        }
+        tr:nth-child(even) {
+            background: #f1f5fd;
+        }
+        tr:hover {
+            background: #e6f0ff;
+            transition: background 0.2s;
+        }
+        @media (max-width: 600px) {
+            .center-container {
+                padding: 18px 4vw;
+                max-width: 98vw;
+            }
+            #menu-img {
+                max-width: 98vw;
+            }
+            table, th, td {
+                font-size: 0.95em;
+            }
+        }
+        .loading-spinner {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(245, 247, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-size: 1.2rem;
+            color: #2d3a5a;
+        }
+        .spinner {
+            border: 5px solid #e0e7ff;
+            border-top: 5px solid #4f8cff;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 18px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+        .results-container {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .preview-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-container">
+        <h1>Menu Extractor</h1>
+        <p class="subtitle">Upload a drink menu image to analyze its contents</p>
+        
+        <div class="preview-section">
+            <div id="upload-area" class="upload-area" style="margin-bottom: 1em;">
+                <span class="upload-icon">📷</span>
+                <p>Drag & drop an image here or click to browse</p>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+            <img id="menu-img" alt="Menu preview">
+            <p id="file-info" class="file-info"></p>
+        </div>
+
+        <div class="results-container">
+            <table id="drinks-table"></table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
