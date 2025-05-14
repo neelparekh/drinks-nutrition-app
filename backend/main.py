@@ -18,7 +18,7 @@ app = FastAPI()
 # Allow frontend to access backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://menu-frontend.vercel.app"],  # Your Vercel URL
+    allow_origins=["https://drinks-nutrition-app.vercel.app"],  # Your Vercel URL
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -170,11 +170,14 @@ async def upload_menu(file: UploadFile = File(...)):
                         try:
                             data = json.loads(truncated_json)
                         except json.JSONDecodeError as final_err:
-                            raise ValueError(f"Failed to parse truncated JSON: {str(final_err)}")
+                            # If all parsing fails, return the raw message as an error
+                            return JSONResponse(content={"error": content})
                     else:
-                        raise ValueError("Could not find any complete drink entries in the response")
+                        # If all parsing fails, return the raw message as an error
+                        return JSONResponse(content={"error": content})
             else:
-                raise ValueError("No valid JSON found in response")
+                # If all parsing fails, return the raw message as an error
+                return JSONResponse(content={"error": content})
         
         return JSONResponse(content=data)
 
